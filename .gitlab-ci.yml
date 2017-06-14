@@ -1,0 +1,58 @@
+before_script:
+  - export HTTP_PROXY=http://proxy02.fiosys.co.jp:8080
+  - export HTTPS_PROXY=http://proxy02.fiosys.co.jp:8080
+  - chmod +x ./gradlew
+
+stages:
+  - test
+  - build
+#  - deploy
+
+
+job_test:
+  stage: test 
+  tags:
+    - docker
+  image: java
+  script: 
+    - ./gradlew test
+#    - ./gradlew jacoco
+
+job_rest_develop_build:
+  stage: build 
+  tags:
+    - docker
+  image: java
+  script: 
+    - ./gradlew test
+#    - ./gradlew jacoco
+#    - awk -F',' 'NR>=2{m+=$4; n+=$5}END{printf("Coverage Total %.2f%%", n*100/(n+m))}' build/reports/jacoco/jacoco/jacoco.csv
+    - ./gradlew jar war
+  artifacts:
+    paths:
+#      - build/reports
+      - build/libs/*.jar
+      - build/libs/*.war
+    expire_in: 1 week
+  only:
+    - develop
+    - develop_phase2.5
+
+job_rest_master_build:
+  stage: build 
+  tags:
+    - docker
+  image: java
+  script: 
+    - ./gradlew test
+#    - ./gradlew jacoco
+#    - awk -F',' 'NR>=2{m+=$4; n+=$5}END{printf("Coverage Total %.2f%%", n*100/(n+m))}' build/reports/jacoco/jacoco/jacoco.csv
+    - ./gradlew jar war
+  artifacts:
+    paths:
+#      - build/reports
+      - build/libs/*.jar
+      - build/libs/*.war
+    expire_in: 1 week
+  only:
+    - master
